@@ -194,12 +194,12 @@ class Lit:
 
         return result
     
-    def compile_all(self) -> List[Dict]:
+    def compile_all(self) -> list[Dict]:
         """
         Compile all languages.
 
         Returns:
-            List[Dict]: A list of dictionaries containing the compiled languages.
+            list[Dict]: A list of dictionaries containing the compiled languages.
         """
         result = []
 

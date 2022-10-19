@@ -5,7 +5,6 @@ l = Lit("./config.json", diasble_warnings=True)
 
 print(l["DE"]["Hi everyone"])
 print(l["UK"]["Hi everyone"])
-print(l["UK"]["Hi everyone"])
 print(l["BE"]["Hi everyone"])
 print(l["FI"]["Hi everyone"])
 
