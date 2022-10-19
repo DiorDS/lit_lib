@@ -130,11 +130,13 @@ class Lit:
             self.config_path = "JSON_STRING"
             
         elif config_path is Path:
-            print("WRNING: Dont use file config for production applications (use json_as_str)!",file=stderr)
+            if self.warnings:
+                print("WRNING: Dont use file config for production applications (use json_as_str)!",file=stderr)
             self.config_path = config_path
             
         else:
-            print("WRNING: Dont use file config for production applications (use json_as_str)!",file=stderr)
+            if self.warnings:
+                print("WRNING: Dont use file config for production applications (use json_as_str)!",file=stderr)
             self.config_path = Path(config_path)
         
         if self.config_path != "JSON_STRING":
