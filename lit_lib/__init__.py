@@ -2,7 +2,7 @@ import json
 from enum import Enum
 from pathlib import Path
 from sys import stderr
-from typing import Union
+from typing import Optional, Union
 
 from deep_translator import GoogleTranslator
 
@@ -51,32 +51,28 @@ class NotFoundInstruction(Enum):
 
 
 class LitLanguage:
-    def __init__(self, name: str, phrases: dict, not_found_instructions: NotFoundInstruction= NotFoundInstruction.TRANSLATE):
+    def __init__(self, name: str, phrases: dict, not_found_instructions: NotFoundInstruction=NotFoundInstruction.TRANSLATE):
         """
-        Initialize the class.
+        Initialize the class
 
-        Args:
-            name: The name of the language.
-            phrases: The phrases of the language.
-            auto_translit: Whether to automatically transliterate the language.
+        :param name: The name of the language
+        :param phrases: The phrases of the language
+        :param not_found_instructions: The instructions to be executed when a phrase is not found
         """
         self.name = name
         self.phrases = phrases
         self.not_found_instructions = not_found_instructions
 
-    def __getitem__(self, key: str) -> str:
-        """Get a phrase from the language.
+    def __getitem__(self, key: str) -> Optional[str]:
+        """
+        Get the translation of the given key.
 
         Args:
-            key (str): The phrase key.
+            key: The key to translate.
 
         Returns:
-            str: The phrase.
-
-        Raises:
-            KeyError: If the phrase key is not found and auto_translit is disabled.
+            The translation of the given key.
         """
-
         print(self.not_found_instructions)
         if key not in self.phrases and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Phrase {key} not found in language {self.name}")
@@ -92,43 +88,46 @@ class LitLanguage:
         
         return result
     
-    def _translit(self, key: str) -> str:
+    def _translit(self, key: str) -> str:  # type: ignore
         """
-        Transliterate the given key to the corresponding value.
+        Transliterate the given key.
 
         Args:
             key: The key to transliterate.
 
         Returns:
-            The transliterated value.
+            The transliterated key.
         """
         return key
 
     def __contains__(self, key: str) -> bool:
-        """Check if a phrase is in the language.
-
-        Args:
-            key (str): The phrase key.
-
-        Returns:
-            bool: True if the phrase is in the language, False otherwise.
         """
+        Check if the key is in the phrases or if auto transliteration is enabled.
 
+        :param key: The key to check.
+        :return: True if the key is in the phrases or if auto transliteration is enabled.
+        """
         return key in self.phrases or self.auto_translit
     
     def __repr__(self) -> str:
         return f"<LitLanguage name={self.name}>"
+    
+    def compile(self) -> str:
+        result = {
+            "name": self.name,
+            "phrases": self.phrases
+        }
+        return result
 
 class Lit:
-    def __init__(self, config_path: Union[str, Path], not_found_instructions: NotFoundInstruction = NotFoundInstruction.TRANSLATE, json_as_str: str = None, diasble_warnings: bool = False):
+    def __init__(self, config_path: Union[str, Path], not_found_instructions: NotFoundInstruction = NotFoundInstruction.TRANSLATE, json_as_str: str = None, diasble_warnings: bool = False) -> None:
         """
-        Initialize the class
+        Initialize the Config class
 
-        Args:
-            config_path (str or Path): Path to the config file
-            auto_translit (bool): Enable auto transliteration
-            json_as_str (str or None): JSON string
-            diasble_warnings (bool): Disable warnings
+        :param config_path: Path to the config file
+        :param not_found_instructions: What to do if a key is not found in the config file
+        :param json_as_str: JSON string to use as config
+        :param diasble_warnings: Disable warnings
         """
         self.warnings = diasble_warnings
         
@@ -154,15 +153,6 @@ class Lit:
             self.config = self._load_config()
 
     def _load_config(self) -> dict:
-        """Load the configuration file.
-
-        Returns:
-            dict: The configuration file as a dictionary.
-
-        Raises:
-            ValueError: If the configuration file is not a valid JSON file.
-        """
-
         with self.config_path.open(encoding="utf-8") as f:
             try:
                 return json.load(f)
@@ -175,7 +165,7 @@ class Lit:
     def __repr__(self) -> str:
         return f"<Lit config_path={self.config_path}>"
     
-    def get(self, key: str, language: str) -> str:
+    def get(self, key: str, language: str) -> str:  # type: ignore
         """
         Get the value of the key in the language.
 
@@ -188,34 +178,31 @@ class Lit:
         """
         return self[language][key]
 
-    def __getitem__(self, key: str) -> LitLanguage:
-        """Get a language from the configuration file.
+    def __getitem__(self, key: str) -> LitLanguage:  # type: ignore
+        """
+        Get a language from the config file.
 
         Args:
-            key (str): The language key.
+            key: The name of the language to get.
 
         Returns:
-            LitLanguage: The language.
+            The language object.
 
         Raises:
-            KeyError: If the language key is not found and auto_translit is disabled"""
-        
+            KeyError: If the language is not found in the config file.
+        """
         if key not in self.config and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Language {key} not found in config file")
             
         return LitLanguage(key, self.config.get(key, []), not_found_instructions= self.not_found_instructions)
 
-    def __setitem__(self, key: str, phrases: list[tuple]) -> None:
+    def __setitem__(self, key: str, phrases: list[tuple[str, str]]) -> None:
         """
         Add a new key to the config dictionary.
 
         Args:
             key: The key to add to the config dictionary.
-            phrases: A list of tuples containing the phrase to translate and
-                the alias to use for the translated phrase.
-
-        Returns:
-            None
+            phrases: A list of tuples containing the phrase to translate and the alias to use.
         """
         res_dict = {}
         for k, alias in phrases:
@@ -228,17 +215,11 @@ class Lit:
 
     @staticmethod
     def _translate(lang: str, phrase: str) -> str:
-        """Translate a word to the given language.
-
-        Args:
-            lang (LitLanguage): The language to translate to.
-            phrase (str): The phrase to translate.
-
-        Returns:
-            str: The translated phrase.
-        """
-
         translator = GoogleTranslator(source='auto', target=lang.lower())
         result = translator.translate(phrase)
 
         return result
+    
+
+def lang_from_compiled_dict(settings: dict) -> LitLanguage:
+    return LitLanguage(settings["name"], settings["phrases"])

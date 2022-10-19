@@ -8,3 +8,5 @@ l["DE"] = [
 de = l["DE"]
 
 print(de["Hi everyone"])
+
+print(de.compile())
