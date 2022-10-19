@@ -120,7 +120,7 @@ class LitLanguage:
         return f"<LitLanguage name={self.name}>"
 
 class Lit:
-    def __init__(self, config_path: Union[str, Path], auto_translit: bool = False, json_as_str: str = None, diasble_warnings: bool = False):
+    def __init__(self, config_path: Union[str, Path], not_found_instructions: NotFoundInstruction = NotFoundInstruction.TRANSLATE, json_as_str: str = None, diasble_warnings: bool = False):
         """
         Initialize the class
 
@@ -150,7 +150,7 @@ class Lit:
             if not self.config_path.exists():
                 raise FileNotFoundError(f"Config file {self.config_path} not found")
 
-            self.auto_translit = auto_translit
+            self.not_found_instructions = not_found_instructions
             self.config = self._load_config()
 
     def _load_config(self) -> dict:
@@ -200,10 +200,10 @@ class Lit:
         Raises:
             KeyError: If the language key is not found and auto_translit is disabled"""
         
-        if key not in self.config and not self.auto_translit:
+        if key not in self.config and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Language {key} not found in config file")
             
-        return LitLanguage(key,self.config.get(key, []))
+        return LitLanguage(key, self.config.get(key, []), not_found_instructions= self.not_found_instructions)
 
     def __setitem__(self, key: str, phrases: list[tuple]) -> None:
         """
