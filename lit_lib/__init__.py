@@ -1,48 +1,12 @@
 import json
+from ast import List
 from enum import Enum
 from pathlib import Path
 from sys import stderr
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 from deep_translator import GoogleTranslator
 
-TRANSLIT = "TRANSLIT"
-
-ru_to_en = {
-    "а": "a",
-    "б": "b",
-    "в": "v",
-    "г": "g",
-    "д": "d",
-    "е": "e",
-    "ё": "e",
-    "ж": "zh",
-    "з": "z",
-    "и": "i",
-    "й": "j",
-    "к": "k",
-    "л": "l",
-    "м": "m",
-    "н": "n",
-    "о": "o",
-    "п": "p",
-    "р": "r",
-    "с": "s",
-    "т": "t",
-    "у": "u",
-    "ф": "f",
-    "х": "x",
-    "ц": "c",
-    "ч": "ch",
-    "ш": "sh",
-    "щ": "ssh",                        
-    "ъ": "",                        
-    "ы": "y`",                        
-    "ь": "",                        
-    "э": "e`",
-    "ю": "yy",
-    "я": "ya"
-}
 
 class NotFoundInstruction(Enum):
     TRANSLATE = 1
@@ -63,6 +27,7 @@ class LitLanguage:
         self.phrases = phrases
         self.not_found_instructions = not_found_instructions
 
+
     def __getitem__(self, key: str) -> Optional[str]:
         """
         Get the translation of the given key.
@@ -73,8 +38,7 @@ class LitLanguage:
         Returns:
             The translation of the given key.
         """
-        print(self.not_found_instructions)
-        if key not in self.phrases and self.not_found_instructions == NotFoundInstruction.NONE:
+        if key not in self.phrases.keys() and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Phrase {key} not found in language {self.name}")
 
         result = self.phrases.get(key)
@@ -107,17 +71,23 @@ class LitLanguage:
         :param key: The key to check.
         :return: True if the key is in the phrases or if auto transliteration is enabled.
         """
-        return key in self.phrases or self.auto_translit
+        return key in self.phrases.keys() or self.auto_translit
     
     def __repr__(self) -> str:
         return f"<LitLanguage name={self.name}>"
     
     def compile(self) -> str:
+        """
+        Compile the current object into a JSON string.
+
+        :return: The JSON string.
+        """
         result = {
             "name": self.name,
             "phrases": self.phrases
         }
         return result
+
 
 class Lit:
     def __init__(self, config_path: Union[str, Path], not_found_instructions: NotFoundInstruction = NotFoundInstruction.TRANSLATE, json_as_str: str = None, diasble_warnings: bool = False) -> None:
@@ -151,6 +121,7 @@ class Lit:
 
             self.not_found_instructions = not_found_instructions
             self.config = self._load_config()
+            self.langs = []
 
     def _load_config(self) -> dict:
         with self.config_path.open(encoding="utf-8") as f:
@@ -193,8 +164,11 @@ class Lit:
         """
         if key not in self.config and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Language {key} not found in config file")
-            
-        return LitLanguage(key, self.config.get(key, []), not_found_instructions= self.not_found_instructions)
+        
+
+        res = LitLanguage(key, self.config.get(key, {}), not_found_instructions= self.not_found_instructions)
+        self.langs.append(res)
+        return res
 
     def __setitem__(self, key: str, phrases: list[tuple[str, str]]) -> None:
         """
@@ -220,6 +194,19 @@ class Lit:
 
         return result
     
+    def compile_all(self) -> List[Dict]:
+        """
+        Compile all languages.
+
+        Returns:
+            List[Dict]: A list of dictionaries containing the compiled languages.
+        """
+        result = []
+
+        for i in self.langs:
+            result.append(i.compile())
+    
+        return result
 
 def lang_from_compiled_dict(settings: dict) -> LitLanguage:
     return LitLanguage(settings["name"], settings["phrases"])

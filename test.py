@@ -1,12 +1,13 @@
-from lit_lib import Lit
+from lit_lib import Lit, lang_from_compiled_dict
 
 l = Lit("./config.json", diasble_warnings=True)
-l["DE"] = [
-    ("Hello World", "hi")
-]
 
-de = l["DE"]
 
-print(de["Hi everyone"])
+print(l["DE"]["Hi everyone"])
+print(l["UK"]["Hi everyone"])
+print(l["UK"]["Hi everyone"])
+print(l["BE"]["Hi everyone"])
+print(l["FI"]["Hi everyone"])
 
-print(de.compile())
+
+print(l.compile_all())
