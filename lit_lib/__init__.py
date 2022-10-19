@@ -77,13 +77,20 @@ class LitLanguage:
             KeyError: If the phrase key is not found and auto_translit is disabled.
         """
 
+        print(self.not_found_instructions)
         if key not in self.phrases and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Phrase {key} not found in language {self.name}")
 
-        return self.phrases.get(
-                key,
-                self._translit(key)
-        )
+        result = self.phrases.get(key)
+
+        if self.not_found_instructions == NotFoundInstruction.TRANSLITERATE and result is None:
+            result = self._translit(key)
+        
+        if self.not_found_instructions == NotFoundInstruction.TRANSLATE and result is None:
+            result = Lit._translate(self.name, key)
+            self.phrases[key] = result
+        
+        return result
     
     def _translit(self, key: str) -> str:
         """
@@ -196,7 +203,7 @@ class Lit:
         if key not in self.config and not self.auto_translit:
             raise KeyError(f"Language {key} not found in config file")
             
-        return LitLanguage(key,self.config.get(key, TRANSLIT), self.auto_translit)
+        return LitLanguage(key,self.config.get(key, []))
 
     def __setitem__(self, key: str, phrases: list[tuple]) -> None:
         """
@@ -219,7 +226,8 @@ class Lit:
         else:
             self.config[key] = res_dict
 
-    def _translate(self, lang: str, phrase: str) -> str:
+    @staticmethod
+    def _translate(lang: str, phrase: str) -> str:
         """Translate a word to the given language.
 
         Args:
