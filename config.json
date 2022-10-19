@@ -1,0 +1,8 @@
+{
+    "RU": {
+        "hello": "Привет мир"
+    },
+    "EN": {
+        "hello": "Hello world"
+    }
+}
