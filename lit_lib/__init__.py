@@ -174,8 +174,7 @@ class Lit:
         Raises:
             KeyError: If the language is not found in the config file.
         """
-
-        self.langs
+        
         if key not in self.config and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Language {key} not found in config file")
         
