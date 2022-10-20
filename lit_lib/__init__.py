@@ -124,12 +124,12 @@ class Lit:
             self.config_path = "JSON_STRING"
             
         elif config_path is Path:
-            if self.warnings:
+            if not self.warnings:
                 print("WARNING: Dont use file config for production applications (use json_as_str)!")
             self.config_path = config_path
             
         else:
-            if self.warnings:
+            if not self.warnings:
                 print("WARNING: Dont use file config for production applications (use json_as_str)!")
             self.config_path = Path(config_path)
         
