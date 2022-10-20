@@ -1,14 +1,15 @@
+from time import perf_counter_ns
+
 from lit_lib import Lit, langs_from_compiled_dict
 
 l = Lit("./config.json", diasble_warnings=True)
 
+start = perf_counter_ns()
 
-print(l["DE"]["Hi everyone"])
-print(l["UK"]["Hi everyone"])
-print(l["BE"]["Hi everyone"])
-print(l["FI"]["Hi everyone"])
-print(l["FI"]["Hi everyone"])
+for i in range(1000):           
+    l["DE"]["Hi everyone"]
 
+end = perf_counter_ns()
 
-print(l.compile_all())
-print(langs_from_compiled_dict(l.compile_all()))
+print((end - start) / 1000)
+print(l["DE"]._debug_trace)
