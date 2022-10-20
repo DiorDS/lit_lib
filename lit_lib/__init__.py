@@ -1,5 +1,4 @@
 import json
-from ast import List
 from enum import Enum
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -206,7 +205,7 @@ class Lit:
 
     @staticmethod
     def _translate(lang: str, phrase: str) -> str:
-        
+
 
         translator = GoogleTranslator(source='auto', target=lang.lower())
         result = translator.translate(phrase)
