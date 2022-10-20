@@ -1,6 +1,6 @@
 from time import perf_counter_ns
 
-from lit_lib import Lit, langs_from_compiled_dict
+from lit_lib import Lit
 
 l = Lit("./config.json", diasble_warnings=True)
 

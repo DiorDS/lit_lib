@@ -1,2 +1,6 @@
 */__pycache__/
 .vscode/
+setup.py
+setup.cfg
+lit_lib.egg-info/
+dist/

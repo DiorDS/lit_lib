@@ -1,6 +1,6 @@
 # lit_lib
 
-
+### You must install deep_translator for lib working corectly
 ### 1 localisation ended in 1008 ns!
 ```
 from time import perf_counter_ns
