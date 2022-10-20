@@ -14,13 +14,18 @@ class NotFoundInstruction(Enum):
 
 
 class LitLanguage:
-    def __init__(self, name: str, phrases: dict, not_found_instructions: NotFoundInstruction=NotFoundInstruction.TRANSLATE):
+    def __init__(self,
+        name: str,
+        phrases: Dict[str, str], 
+        not_found_instructions: NotFoundInstruction=NotFoundInstruction.TRANSLATE
+    ):
         """
-        Initialize the class
+        Represents a phrase in a language.
 
-        :param name: The name of the language
-        :param phrases: The phrases of the language
-        :param not_found_instructions: The instructions to be executed when a phrase is not found
+        Attributes:
+            name: The name of the phrase.
+            phrases: The phrases in the language.
+            not_found_instructions: The instructions to follow when a phrase is not found.
         """
         self.name = name
         self.phrases = phrases
@@ -37,15 +42,18 @@ class LitLanguage:
         Returns:
             The translation of the given key.
         """
-        if key not in self.phrases.keys() and self.not_found_instructions == NotFoundInstruction.NONE:
+
+        nfi = self.not_found_instructions == NotFoundInstruction.NONE
+        if key not in self.phrases.keys() and nfi:
             raise KeyError(f"Phrase {key} not found in language {self.name}")
 
         result = self.phrases.get(key)
-
-        if self.not_found_instructions == NotFoundInstruction.TRANSLITERATE and result is None:
+        nfi = self.not_found_instructions == NotFoundInstruction.TRANSLITERATE
+        if nfi and result is None:
             result = self._translit(key)
-        
-        if self.not_found_instructions == NotFoundInstruction.TRANSLATE and result is None:
+
+        nfi = self.not_found_instructions == NotFoundInstruction.TRANSLATE
+        if nfi and result is None:
             result = Lit._translate(self.name, key)
             self.phrases[key] = result
         
@@ -65,22 +73,21 @@ class LitLanguage:
 
     def __contains__(self, key: str) -> bool:
         """
-        Check if the key is in the phrases or if auto transliteration is enabled.
+        Check if the key is in the dictionary.
 
-        :param key: The key to check.
-        :return: True if the key is in the phrases or if auto transliteration is enabled.
+        Args:
+            key: The key to check.
+
+        Returns:
+            True if the key is in the dictionary, False otherwise.
         """
-        return key in self.phrases.keys() or self.auto_translit
+        
+        return key in self.phrases.keys() or not self.not_found_instructions == NotFoundInstruction.NONE
     
     def __repr__(self) -> str:
         return f"<LitLanguage name={self.name}>"
     
     def compile(self) -> Dict:
-        """
-        Compile the current object into a JSON string.
-
-        :return: The JSON string.
-        """
         result = {
             "name": self.name,
             "phrases": self.phrases
@@ -89,14 +96,21 @@ class LitLanguage:
 
 
 class Lit:
-    def __init__(self, config_path: Union[str, Path], not_found_instructions: NotFoundInstruction = NotFoundInstruction.TRANSLATE, json_as_str: str = None, diasble_warnings: bool = False) -> None:
+    def __init__(
+            self, 
+            config_path: Union[str, Path], 
+            not_found_instructions: NotFoundInstruction = NotFoundInstruction.TRANSLATE, 
+            json_as_str: str = None, 
+            diasble_warnings: bool = False
+        ) -> None:
         """
-        Initialize the Config class
+        Initialize the class.
 
-        :param config_path: Path to the config file
-        :param not_found_instructions: What to do if a key is not found in the config file
-        :param json_as_str: JSON string to use as config
-        :param diasble_warnings: Disable warnings
+        Args:
+            config_path: Path to the config file.
+            not_found_instructions: Instructions for the not found keys.
+            json_as_str: JSON string.
+            diasble_warnings: Disable warnings.
         """
         self.warnings = diasble_warnings
         
@@ -120,7 +134,7 @@ class Lit:
 
             self.not_found_instructions = not_found_instructions
             self.config = self._load_config()
-            self.langs = []
+            self.langs = {}
 
     def _load_config(self) -> dict:
         with self.config_path.open(encoding="utf-8") as f:
@@ -161,13 +175,17 @@ class Lit:
         Raises:
             KeyError: If the language is not found in the config file.
         """
+
+        self.langs
         if key not in self.config and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Language {key} not found in config file")
         
+        if key not in self.langs.values():
+            res = LitLanguage(key, self.config.get(key, {}), not_found_instructions= self.not_found_instructions)
+            self.langs[key] = res
 
-        res = LitLanguage(key, self.config.get(key, {}), not_found_instructions= self.not_found_instructions)
-        self.langs.append(res)
-        return res
+
+        return self.langs[key]
 
     def __setitem__(self, key: str, phrases: list[tuple[str, str]]) -> None:
         """
@@ -188,6 +206,8 @@ class Lit:
 
     @staticmethod
     def _translate(lang: str, phrase: str) -> str:
+        
+
         translator = GoogleTranslator(source='auto', target=lang.lower())
         result = translator.translate(phrase)
 
@@ -202,7 +222,7 @@ class Lit:
         """
         result = []
 
-        for i in self.langs:
+        for i in self.langs.values():
             result.append(i.compile())
     
         return result
