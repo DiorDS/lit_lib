@@ -13,13 +13,13 @@ class NotFoundInstruction(Enum):
 
 
 class LitLanguage:
-    def __init__(self,
+    def __init__(
+        self,
         name: str,
-        phrases: Dict[str, str], 
-        not_found_instructions: NotFoundInstruction= NotFoundInstruction.TRANSLATE
+        phrases: Dict[str, str],
+        not_found_instructions: NotFoundInstruction = NotFoundInstruction.TRANSLATE,
     ):
-        """
-        Represents a phrase in a language.
+        """Represents a phrase in a language.
 
         Attributes:
             name: The name of the phrase.
@@ -85,8 +85,13 @@ class LitLanguage:
     
     def __repr__(self) -> str:
         return f"<LitLanguage name={self.name}>"
-    
+
     def compile(self) -> Dict:
+        """
+        Compile the current object into a dictionary.
+
+        :return: A dictionary representation of the current object.
+        """
         result = {
             "name": self.name,
             "phrases": self.phrases
@@ -174,7 +179,7 @@ class Lit:
         Raises:
             KeyError: If the language is not found in the config file.
         """
-
+ 
         if key not in self.config and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Language {key} not found in config file")
         
@@ -203,8 +208,17 @@ class Lit:
             self.config[key] = res_dict
 
     @staticmethod
-    def _translate(lang: str, phrase: str) -> str:
+    def _translate(lang: str, phrase: str) -> str:  # type: ignore
+        """
+        Translate a phrase to a given language using Google Translate.
 
+        Args:
+            lang: The language to translate the phrase to.
+            phrase: The phrase to translate.
+
+        Returns:
+            The translated phrase.
+        """
 
         translator = GoogleTranslator(source='auto', target=lang.lower())
         result = translator.translate(phrase)
@@ -225,7 +239,8 @@ class Lit:
     
         return result
 
-def langs_from_compiled_dict(settings: Union[dict, list, str]) -> LitLanguage:
+def langs_from_compiled_dict(settings: Union[dict, list, str]) -> list[LitLanguage]:
+    
     result = []
     if settings is str:
         settings = json.loads(settings)
@@ -239,3 +254,5 @@ def langs_from_compiled_dict(settings: Union[dict, list, str]) -> LitLanguage:
 
     else:
         raise TypeError("Invalid type")
+    
+    return result
