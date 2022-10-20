@@ -242,14 +242,14 @@ class Lit:
 def langs_from_compiled_dict(settings: Union[dict, list, str]) -> list[LitLanguage]:
     
     result = []
-    if settings is str:
+    if type(settings) is str:
         settings = json.loads(settings)
 
-    if settings is list:
+    if type(settings) is list:
         for i in settings:
             result.append(LitLanguage(i["name"], i["phrases"]))
 
-    elif settings is dict:
+    elif type(settings) is dict:
         result.append(LitLanguage(settings["name"], settings["phrases"]))
 
     else:
