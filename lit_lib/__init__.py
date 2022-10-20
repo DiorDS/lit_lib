@@ -16,7 +16,7 @@ class LitLanguage:
     def __init__(self,
         name: str,
         phrases: Dict[str, str], 
-        not_found_instructions: NotFoundInstruction=NotFoundInstruction.TRANSLATE
+        not_found_instructions: NotFoundInstruction= NotFoundInstruction.TRANSLATE
     ):
         """
         Represents a phrase in a language.
@@ -119,12 +119,12 @@ class Lit:
             
         elif config_path is Path:
             if self.warnings:
-                print("WRNING: Dont use file config for production applications (use json_as_str)!")
+                print("WARNING: Dont use file config for production applications (use json_as_str)!")
             self.config_path = config_path
             
         else:
             if self.warnings:
-                print("WRNING: Dont use file config for production applications (use json_as_str)!")
+                print("WARNING: Dont use file config for production applications (use json_as_str)!")
             self.config_path = Path(config_path)
         
         if self.config_path != "JSON_STRING":
