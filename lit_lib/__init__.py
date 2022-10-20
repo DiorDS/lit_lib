@@ -2,7 +2,6 @@ import json
 from ast import List
 from enum import Enum
 from pathlib import Path
-from sys import stderr
 from typing import Dict, Optional, Union
 
 from deep_translator import GoogleTranslator
@@ -52,7 +51,7 @@ class LitLanguage:
         
         return result
     
-    def _translit(self, key: str) -> str:  # type: ignore
+    def _translit(self, key: str) -> str:
         """
         Transliterate the given key.
 
@@ -76,7 +75,7 @@ class LitLanguage:
     def __repr__(self) -> str:
         return f"<LitLanguage name={self.name}>"
     
-    def compile(self) -> str:
+    def compile(self) -> Dict:
         """
         Compile the current object into a JSON string.
 
@@ -107,12 +106,12 @@ class Lit:
             
         elif config_path is Path:
             if self.warnings:
-                print("WRNING: Dont use file config for production applications (use json_as_str)!",file=stderr)
+                print("WRNING: Dont use file config for production applications (use json_as_str)!")
             self.config_path = config_path
             
         else:
             if self.warnings:
-                print("WRNING: Dont use file config for production applications (use json_as_str)!",file=stderr)
+                print("WRNING: Dont use file config for production applications (use json_as_str)!")
             self.config_path = Path(config_path)
         
         if self.config_path != "JSON_STRING":
@@ -136,7 +135,7 @@ class Lit:
     def __repr__(self) -> str:
         return f"<Lit config_path={self.config_path}>"
     
-    def get(self, key: str, language: str) -> str:  # type: ignore
+    def get(self, key: str, language: str) -> str:
         """
         Get the value of the key in the language.
 
@@ -149,7 +148,7 @@ class Lit:
         """
         return self[language][key]
 
-    def __getitem__(self, key: str) -> LitLanguage:  # type: ignore
+    def __getitem__(self, key: str) -> LitLanguage:
         """
         Get a language from the config file.
 
