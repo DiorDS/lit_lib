@@ -174,7 +174,7 @@ class Lit:
         Raises:
             KeyError: If the language is not found in the config file.
         """
-        
+
         if key not in self.config and self.not_found_instructions == NotFoundInstruction.NONE:
             raise KeyError(f"Language {key} not found in config file")
         
@@ -225,5 +225,17 @@ class Lit:
     
         return result
 
-def lang_from_compiled_dict(settings: dict) -> LitLanguage:
-    return LitLanguage(settings["name"], settings["phrases"])
+def langs_from_compiled_dict(settings: Union[dict, list, str]) -> LitLanguage:
+    result = []
+    if settings is str:
+        settings = json.loads(settings)
+
+    if settings is list:
+        for i in settings:
+            result.append(LitLanguage(i["name"], i["phrases"]))
+
+    elif settings is dict:
+        result.append(LitLanguage(settings["name"], settings["phrases"]))
+
+    else:
+        raise TypeError("Invalid type")
