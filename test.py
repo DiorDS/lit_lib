@@ -6,10 +6,9 @@ l = Lit("./config.json", diasble_warnings=True)
 
 start = perf_counter_ns()
 
-for i in range(1000):           
+for i in range(1000000):           
     l["DE"]["Hi everyone"]
 
 end = perf_counter_ns()
 
-print((end - start) / 1000)
-print(l["DE"]._debug_trace)
+print((end - start) / 1000000)

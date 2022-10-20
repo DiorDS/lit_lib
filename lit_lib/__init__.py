@@ -27,7 +27,6 @@ class LitLanguage:
             not_found_instructions: The instructions to follow when a phrase is not found.
         """
 
-        self._debug_trace = []
         self.name = name
         self.phrases = phrases
         self.not_found_instructions = not_found_instructions
@@ -49,19 +48,14 @@ class LitLanguage:
             raise KeyError(f"Phrase {key} not found in language {self.name}")
 
         result = self.phrases.get(key)
-
-        self._debug_trace.append(f"Getted value {result}")
-
         nfi = self.not_found_instructions == NotFoundInstruction.TRANSLITERATE
         if nfi and result is None:
             result = self._translit(key)
-            self._debug_trace.append("Transliterated")
 
         nfi = self.not_found_instructions == NotFoundInstruction.TRANSLATE
         if nfi and result is None:
             result = Lit._translate(self.name, key)
             self.phrases[key] = result
-            self._debug_trace.append("Translated")
         
         return result
     
